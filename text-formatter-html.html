@@ -85,14 +85,20 @@
         function formatText(input) {
             return input
                 .split('\n')
-                .reduce((acc, line) => {
+                .reduce((acc, line, index) => {
                     const match = line.match(/^(C\d+)(.*)$/);
                     if (match) {
-                        if (acc.length > 0) acc.push(''); // Add an empty line between criteria
-                        acc.push(`${match[1]}:${match[2].trim()}`);
+                        if (index > 0) acc.push(''); // Add an empty line between criteria, but not before the first one
+                        acc.push(`${match[1]}:${match[2].trim() ? ' ' + match[2].trim() : ''} (✔️)`);
                     } else if (line.trim() !== '') {
                         // Append non-empty lines to the last criterion
-                        acc[acc.length - 1] += ' ' + line.trim();
+                        if (acc.length > 0) {
+                            acc[acc.length - 1] = acc[acc.length - 1].replace(/ \(✔️\)$/, ''); // Remove checkmark temporarily
+                            acc[acc.length - 1] += ' ' + line.trim() + ' (✔️)'; // Add checkmark at the end
+                        } else {
+                            // If there's no previous line, just add this line
+                            acc.push(line.trim() + ' (✔️)');
+                        }
                     }
                     return acc;
                 }, [])
